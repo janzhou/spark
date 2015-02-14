@@ -308,6 +308,17 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
+   * Return a new RDD containing only the elements that satisfy a predicate.
+   */
+  def select(f: T => Boolean): RDD[T] = {
+    val cleanF = sc.clean(f)
+    new SelectiveRDD[T, T](
+      this,
+      (context, pid, iter) => iter.filter(cleanF),
+      preservesPartitioning = true)
+  }
+
+  /**
    * Return a new RDD containing the distinct elements in this RDD.
    */
   def distinct(numPartitions: Int)(implicit ord: Ordering[T] = null): RDD[T] =
